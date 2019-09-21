@@ -6,10 +6,6 @@ defmodule ElixirbotTest do
 
   @opts Router.init([])
 
-  test "greets the world" do
-    assert Elixirbot.hello() == :world
-  end
-
   test "Response" do
     conn = conn(:post, "/webhook", "") |> Router.call(@opts)
 
