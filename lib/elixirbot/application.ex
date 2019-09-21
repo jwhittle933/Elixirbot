@@ -7,8 +7,7 @@ defmodule Elixirbot.Application do
 
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: Elixirbot.Worker.start_link(arg)
-      # {Elixirbot.Worker, arg}
+      Plug.Cowboy.child_spec(scheme: :http, plug: Elixirbot.Router, options: [port: 4000])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

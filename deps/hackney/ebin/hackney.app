@@ -1,6 +1,6 @@
 {application,hackney,
              [{description,"simple HTTP client"},
-              {vsn,"1.6.6"},
+              {vsn,"1.15.1"},
               {registered,[hackney_pool]},
               {applications,[kernel,stdlib,crypto,asn1,public_key,ssl,idna,
                              mimerl,certifi,ssl_verify_fun,metrics]},
@@ -19,8 +19,9 @@
                       "NEWS.md","LICENSE","NOTICE","MAINTAINERS"]},
               {modules,[hackney,hackney_app,hackney_bstr,hackney_connect,
                         hackney_cookie,hackney_date,hackney_headers,
-                        hackney_http,hackney_http_connect,hackney_local_tcp,
-                        hackney_manager,hackney_multipart,hackney_pool,
-                        hackney_pool_handler,hackney_request,hackney_response,
-                        hackney_socks5,hackney_ssl,hackney_stream,hackney_sup,
-                        hackney_tcp,hackney_trace,hackney_url,hackney_util]}]}.
+                        hackney_headers_new,hackney_http,hackney_http_connect,
+                        hackney_local_tcp,hackney_manager,hackney_metrics,
+                        hackney_multipart,hackney_pool,hackney_pool_handler,
+                        hackney_request,hackney_response,hackney_socks5,
+                        hackney_ssl,hackney_stream,hackney_sup,hackney_tcp,
+                        hackney_trace,hackney_url,hackney_util]}]}.

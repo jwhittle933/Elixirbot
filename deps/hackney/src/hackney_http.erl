@@ -60,7 +60,7 @@
 -include("hackney_lib.hrl").
 
 
--opaque parser() :: #hparser{}.
+-type parser() :: #hparser{}.
 -export_type([parser/0]).
 
 -type http_version() :: {integer(), integer()}.
@@ -70,12 +70,17 @@
 -type uri() :: binary().
 -type body_result() :: {more, parser(), binary()}
 | {ok, binary(), parser()}
-| {done, binary()}.
+| {done, binary()}
+| done.
+
+-type header_result() :: {headers_complete, parser()}
+| {header, {binary(), binary()}, parser()}.
 
 -type parser_result() ::
 {response, http_version(), status(), http_reason(), parser()}
-| {request, http_version(), http_method(), uri(), parser()}
+| {request, http_method(), uri(), http_version(), parser()}
 | {more, parser()}
+| header_result()
 | body_result()
 | {error, term()}.
 
@@ -137,7 +142,7 @@ execute(#hparser{state=Status, buffer=Buffer}=St, Bin) ->
   %% update the state with the new buffer
   NBuffer = << Buffer/binary, Bin/binary >>,
   St1 = St#hparser{buffer=NBuffer},
-  
+
   %% process the right state.
   case Status of
     done -> done;
@@ -166,15 +171,8 @@ parse_first_line(Buffer, St=#hparser{type=Type,
       parse_first_line(Rest, St, Empty + 1);
     _ when Type =:= auto ->
       case parse_request_line(St) of
-        {error, bad_request} ->
-          case parse_response_line(St) of
-            {error, bad_request} = Error ->
-              Error;
-            OK ->
-              OK
-          end;
-        OK ->
-          OK
+        {request, _Method, _URI, _Version, _NState} = Req -> Req;
+        {error, bad_request} -> parse_response_line(St)
       end;
     _ when Type =:= response ->
       parse_response_line(St);
@@ -217,7 +215,7 @@ parse_status(<< C, Rest/bits >>, St, Version, Acc) ->
 
 parse_reason(Reason, St, Version, StatusCode) ->
   StatusInt = list_to_integer(binary_to_list(StatusCode)),
-  
+
   NState = St#hparser{type=response,
     version=Version,
     state=on_header,
@@ -252,7 +250,7 @@ parse_uri_path(<< C, Rest/bits >>, St, Method, Acc) ->
 parse_version(<< "HTTP/", High, ".", Low, $\r , $\n, Rest/binary >>, St, Method, URI)
   when High >= $0, High =< $9, Low >= $0, Low =< $9 ->
   Version = { High -$0, Low - $0},
-  
+
   NState = St#hparser{type=request,
     version=Version,
     method=Method,
@@ -300,8 +298,10 @@ parse_header(Line, St) ->
                  end,
   St1 = case hackney_bstr:to_lower(hackney_bstr:trim(Key)) of
           <<"content-length">> ->
-            CLen = list_to_integer(binary_to_list(hackney_bstr:trim(Value))),
-            St#hparser{clen=CLen};
+            case hackney_util:to_int(Value) of
+              {ok, CLen} -> St#hparser{clen=CLen};
+              false -> St#hparser{clen=bad_int}
+            end;
           <<"transfer-encoding">> ->
             TE = hackney_bstr:to_lower(hackney_bstr:trim(Value)),
             St#hparser{te=TE};
@@ -330,30 +330,32 @@ parse_trailers(St, Acc) ->
     _ -> error
   end.
 
-parse_body(St=#hparser{body_state=waiting, te=TE, clen=Length,
-  method=Method, buffer=Buffer}) ->
-  case TE of
-    <<"chunked">> ->
+parse_body(#hparser{body_state=waiting, method= <<"HEAD">>, buffer=Buffer}) ->
+ {done, Buffer};
+parse_body(St=#hparser{body_state=waiting, te=TE, clen=Length, buffer=Buffer}) ->
+  case {TE, Length} of
+    {<<"chunked">>, _} ->
       parse_body(St#hparser{body_state=
       {stream, fun te_chunked/2, {0, 0}, fun ce_identity/1}});
-    _ when Length =:= 0 orelse Method =:= <<"HEAD">> ->
+    {_, 0} ->
       {done, Buffer};
-    _ ->
-      parse_body(St#hparser{body_state=
-      {stream, fun te_identity/2, {0, Length},
-        fun ce_identity/1}})
+    {_, bad_int} ->
+      {done, Buffer};
+    {_, _} ->
+      parse_body(
+        St#hparser{body_state={stream, fun te_identity/2, {0, Length}, fun ce_identity/1}}
+       )
   end;
 parse_body(#hparser{body_state=done, buffer=Buffer}) ->
   {done, Buffer};
-parse_body(St=#hparser{buffer=Buffer, body_state={stream, _, _, _}})
-  when byte_size(Buffer) > 0 ->
+parse_body(St=#hparser{buffer=Buffer, body_state={stream, _, _, _}}) when byte_size(Buffer) > 0 ->
   transfer_decode(Buffer, St#hparser{buffer= <<>>});
 parse_body(St) ->
   {more, St, <<>>}.
 
 
 -spec transfer_decode(binary(), #hparser{})
-    -> {ok, binary(), #hparser{}} | {error, atom()}.
+    -> {ok, binary(), #hparser{}} | {done, binary()} | {error, atom()}.
 transfer_decode(Data, St=#hparser{
   body_state={stream, TransferDecode,
     TransferState, ContentDecode},
@@ -450,7 +452,7 @@ read_size(Data) ->
   case read_size(Data, [], true) of
     {ok, Line, Rest} ->
       case io_lib:fread("~16u", Line) of
-        {ok, [Size], []} ->
+        {ok, [Size], _} ->
           {ok, Size, Rest};
         _ ->
           {error, {poorly_formatted_size, Line}}
@@ -466,6 +468,9 @@ read_size(<<"\r\n", Rest/binary>>, Acc, _) ->
   {ok, lists:reverse(Acc), Rest};
 
 read_size(<<$;, Rest/binary>>, Acc, _) ->
+  read_size(Rest, Acc, false);
+
+read_size(<<$\s, Rest/binary>>, Acc, _) ->
   read_size(Rest, Acc, false);
 
 read_size(<<C, Rest/binary>>, Acc, AddToAcc) ->

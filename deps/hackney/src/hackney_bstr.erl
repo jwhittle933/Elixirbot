@@ -21,6 +21,15 @@
   word/2,
   trim/1]).
 
+%% BEGIN: Remove when OTP 17 not officially supported
+-export([split/3]).
+
+-export_type([cp/0]).
+
+-opaque cp() :: {'am' | 'bm', binary()}.
+-type part() :: {Start :: non_neg_integer(), Length :: integer()}.
+%% END: Remove when OTP 17 not officially supported
+
 -export([quoted_string/2]).
 
 to_binary(V) when is_list(V) ->
@@ -33,16 +42,17 @@ to_binary(V) when is_binary(V) ->
   V.
 
 %% @doc Convert a binary string to lowercase.
--spec to_lower(binary()) -> binary().
-to_lower(L) when is_list(L) ->
-  to_lower(list_to_binary(L));
+-spec to_lower(binary()|atom()|list()) -> binary().
+to_lower(L) when is_binary(L) ->
+  << << (char_to_lower(C)) >> || << C >> <= L >>;
 to_lower(L) ->
-  << << (char_to_lower(C)) >> || << C >> <= L >>.
+  to_lower(to_binary(L)).
 
-to_upper(L) when is_list(L) ->
-  to_upper(list_to_binary(L));
-to_upper(U) ->
-  << << (char_to_upper(C)) >> || << C >> <= U >>.
+-spec to_upper(binary()|atom()|list()) -> binary().
+to_upper(U) when is_binary(U)->
+  << << (char_to_upper(C)) >> || << C >> <= U >>;
+to_upper(L) ->
+  to_upper(to_binary(L)).
 
 
 %% @doc Convert [A-Z] characters to lowercase.
@@ -360,3 +370,80 @@ quoted_string(<< $\\, C, Rest/binary >>, Fun, Acc) ->
   quoted_string(Rest, Fun, << Acc/binary, C >>);
 quoted_string(<< C, Rest/binary >>, Fun, Acc) ->
   quoted_string(Rest, Fun, << Acc/binary, C >>).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% binary:split/3 from OTP 18
+%% remove when support for < 18
+%% formally dropped
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+-spec split(Subject, Pattern, Options) -> Parts when
+  Subject :: binary(),
+  Pattern :: binary() | [binary()] | cp(),
+  Options :: [Option],
+  Option :: {scope, part()} | trim | global | trim_all,
+  Parts :: [binary()].
+
+split(Haystack,Needles,Options) ->
+  try
+    {Part,Global,Trim,TrimAll} =
+      get_opts_split(Options,{no,false,false,false}),
+    Moptlist = case Part of
+                 no ->
+                   [];
+                 {A,B} ->
+                   [{scope,{A,B}}]
+               end,
+    MList = if
+              Global ->
+                binary:matches(Haystack,Needles,Moptlist);
+              true ->
+                case binary:match(Haystack,Needles,Moptlist) of
+                  nomatch -> [];
+                  Match -> [Match]
+                end
+            end,
+    do_split(Haystack,MList,0,Trim,TrimAll)
+  catch
+    _:_ ->
+      erlang:error(badarg)
+  end.
+
+do_split(H,[],N,true,_) when N >= byte_size(H) ->
+  [];
+do_split(H,[],N,_,true) when N >= byte_size(H) ->
+  [];
+do_split(H,[],N,_,_) ->
+  [binary:part(H,{N,byte_size(H)-N})];
+do_split(H,[{A,B}|T],N,Trim,TrimAll) ->
+  case binary:part(H,{N,A-N}) of
+    <<>> when TrimAll == true ->
+      do_split(H,T,A+B,Trim,TrimAll);
+    <<>> ->
+      Rest =  do_split(H,T,A+B,Trim,TrimAll),
+      case {Trim, Rest} of
+        {true,[]} ->
+          [];
+        _ ->
+          [<<>> | Rest]
+      end;
+    Oth ->
+      [Oth | do_split(H,T,A+B,Trim,TrimAll)]
+  end.
+
+get_opts_split([],{Part,Global,Trim,TrimAll}) ->
+  {Part,Global,Trim,TrimAll};
+get_opts_split([{scope,{A,B}} | T],{_Part,Global,Trim,TrimAll}) ->
+  get_opts_split(T,{{A,B},Global,Trim,TrimAll});
+get_opts_split([global | T],{Part,_Global,Trim,TrimAll}) ->
+  get_opts_split(T,{Part,true,Trim,TrimAll});
+get_opts_split([trim | T],{Part,Global,_Trim,TrimAll}) ->
+  get_opts_split(T,{Part,Global,true,TrimAll});
+get_opts_split([trim_all | T],{Part,Global,Trim,_TrimAll}) ->
+  get_opts_split(T,{Part,Global,Trim,true});
+get_opts_split(_,_) ->
+  throw(badopt).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  END binary:split from OTP 18
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

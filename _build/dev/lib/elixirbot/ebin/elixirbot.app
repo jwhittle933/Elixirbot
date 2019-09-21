@@ -1,7 +1,9 @@
 {application,elixirbot,
-             [{applications,[kernel,stdlib,elixir,logger,slack]},
+             [{applications,[kernel,stdlib,elixir,logger,slack,poison,plug,
+                             plug_cowboy]},
               {description,"elixirbot"},
-              {modules,['Elixir.Elixirbot','Elixir.Elixirbot.Application']},
+              {modules,['Elixir.Elixirbot','Elixir.Elixirbot.Application',
+                        'Elixir.Elixirbot.Router']},
               {registered,[]},
               {vsn,"0.1.0"},
               {mod,{'Elixir.Elixirbot.Application',[]}}]}.

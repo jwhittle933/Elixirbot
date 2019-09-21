@@ -6,14 +6,35 @@ defmodule HTTPoison.Mixfile do
   """
 
   def project do
-    [ app: :httpoison,
-      version: "0.8.3",
-      elixir: "~> 1.0",
+    [
+      app: :httpoison,
+      version: "1.5.1",
+      elixir: "~> 1.5",
       name: "HTTPoison",
       description: @description,
-      package: package,
-      deps: deps,
-      source_url: "https://github.com/edgurgel/httpoison" ]
+      package: package(),
+      deps: deps(),
+      source_url: "https://github.com/edgurgel/httpoison",
+      docs: [
+        main: "readme",
+        logo: "logo.png",
+        extras: [
+          "README.md",
+          "CHANGELOG.md"
+        ]
+      ],
+      dialyzer: [
+        plt_add_deps: :transitive,
+        flags: [
+          # "-Wunmatched_returns",
+          # "-Wrace_conditions",
+          # "-Wunderspecs",
+          # "-Wunknown",
+          # "-Woverspecs",
+          # "-Wspecdiffs",
+        ]
+      ]
+    ]
   end
 
   def application do
@@ -22,18 +43,24 @@ defmodule HTTPoison.Mixfile do
 
   defp deps do
     [
-      {:hackney, "~> 1.6.0"},
+      {:hackney, "~> 1.8"},
+      {:mimic, "~> 0.1", only: :test},
       {:exjsx, "~> 3.1", only: :test},
-      {:httparrot, "~> 0.3.4", only: :test},
-      {:meck, "~> 0.8.2", only: :test},
-      {:earmark, "~> 0.1.17", only: :docs},
-      {:ex_doc, "~> 0.8.0", only: :docs},
+      {:httparrot, "~> 1.0", only: :test},
+      {:earmark, "~> 1.0", only: :dev},
+      {:ex_doc, "~> 0.18", only: :dev},
+      {:dialyxir, "~> 1.0.0-rc.3", only: [:dev, :test], runtime: false}
     ]
   end
 
   defp package do
-    [ maintainers: ["Eduardo Gurgel Pinho"],
+    [
+      maintainers: ["Eduardo Gurgel Pinho"],
       licenses: ["MIT"],
-      links: %{"Github" => "https://github.com/edgurgel/httpoison"} ]
+      links: %{
+        Changelog: "https://github.com/edgurgel/httpoison/blob/master/CHANGELOG.md",
+        GitHub: "https://github.com/edgurgel/httpoison"
+      }
+    ]
   end
 end

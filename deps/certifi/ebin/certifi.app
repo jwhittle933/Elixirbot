@@ -1,11 +1,12 @@
 {application,certifi,
-             [{description,"An OTP library"},
-              {vsn,"1.0.0"},
+             [{description,"CA bundle adapted from Mozilla by https://certifi.io"},
+              {vsn,"2.5.1"},
               {registered,[]},
               {applications,[kernel,stdlib]},
               {env,[]},
-              {modules,[certifi,certifi_cacerts,certifi_weakcerts]},
+              {modules,[certifi]},
               {maintainers,["Benoit Chesneau"]},
               {licenses,["BSD"]},
-              {links,[{"Github",
-                       "https://github.com/certifi/erlang-certifi"}]}]}.
+              {links,[{"Github","https://github.com/certifi/erlang-certifi"}]},
+              {files,["src","priv","test","rebar.config","README.md",
+                      "LICENSE"]}]}.

@@ -1,5 +1,181 @@
 # NEWS
 
+1.15.1 - 2019-02-26
+-------------------
+
+- fix: don't try to encode encode to IDN with full ASCII namee.
+
+> this behaviour is similar to curl and fix errors some people had with docker
+> creating domain names containing a `_`
+
+- doc: clarify `recv_timeout` usage
+- fix: don't try to encode hostname IPs to IDN
+- fix: path encoding to suppor `(` `)` characters
+- bump mimerl to 1.2
+- bump certifi to 2.5.1
+
+
+1.15.0 - 2019-01-04
+-------------------
+
+- improve multipart: send form with a field names for files
+- fix pool `checkout_cancel`: reduce the number of pending requests
+
+1.14.3 - 2018-09-29
+-------------------
+
+- idna: don't try to encode a unix socket path
+
+1.14.2 - 2018-09-28
+-------------------
+
+- fix: don't IDNA encode the host with unix scheme
+- doc: document `basic_auth` setting
+
+1.14.0 - 2018-09-12
+-------------------
+
+- bump to certifi 2.4.2
+- bump to idna 0.6.0
+- fix support of rebar2
+- fix specs
+- add `hackney:sockname/1` adn `hackney:peername/1` functions
+- add new `checkout_timeout` option for clarity
+- improve `hackney_url:parse_qs/1` to trim leading and trailing empty values
+
+
+1.13.0 - 2018-06-22
+-------------------
+
+- fix compatibility with Erlang/OTP 21
+- fix parsing query parameters on url without path (#512)
+- bump idna to 1.5.2: fix compatibility with rebar2 (#509)
+- fix accessing HTTPS sites with an IP address (#494)
+
+1.12.1 - 2018-04-03
+-------------------
+
+- fix terminate_async_response (#498)
+
+1.12.0 - 2018-04-03
+-------------------
+
+- fix socks5 badarg error when an IP is given
+- upgrade IDNA to 5.1.1
+- upgrade certifi to 2.3.1
+- fix handling of requests with content-length or transfer-encoding given (#475)
+- improvements: send SNI in socks5 SSL
+- fix:  Allow trailing spaces at the end of chunk sizes (#489)
+- fix: set once the metrics engine
+- fix leak in the socket pool (#462)
+- fix doc
+
+1.11.0 - 2018-01-23
+-------------------
+
+- add: send SNI for Erlang >= 17
+- fix: better handling of stream exits in `hackney_manager`
+- improvement: remove high priority flag from the pool process
+- fix: change when hackney loads the hackney metric module (speed improvement)
+- fix: return value from the function `del_from_queue` in connection pool
+- fix: handle empty or invalid content-length
+- fix documentation on removed method
+
+
+1.10.1 - 2017-10-20
+-------------------
+
+- improvement: ignore port empty values on redirect (#444)
+- fix: fix reference leak introduced in latest version (#445)
+- fix: stream termination, don't raise an error on normal exit
+
+1.10.0 - 2017-10-18
+-------------------
+
+- fix owner tracking (#443)
+- fix: fix deadlock in `hackney_pool` during request timeout (#420)
+- fix: set PoolHandler on connect (#427)
+- fix: fix unicode in include file (#426)
+
+1.9.0 - 2017-07-30
+------------------
+
+- security: certifi 2.0.0
+- dependency: update idna 5.1.0 (fix windows build and usage with elixir)
+- doc: fix typo `hackney_multipart` doc (#422)
+
+1.8.6 - 2017-06-09
+--------------------
+
+- fix: cleanup socket in async request (#411)
+
+1.8.5 - 2017-05-30
+------------------
+
+- fix: dialyzer
+
+1.8.4 - 2017-05-28
+------------------
+
+- fix: tests
+- dependency: update idna  5.0.2 (fix compatibility with erlang R20)
+
+1.8.3 - 2017-05-22
+------------------
+
+- security: certifi 1.2.1
+- dependency: update idna  5.0.1
+
+1.8.2 - 2017-05-20
+------------------
+
+- fix: race condition in controlling process (#407)
+- fix: spec of #hackney_url{} (#404)
+- fix: make sure to not lost a message during hiberntion in async request
+- security: certifi 1.2.0
+- dependency: update idna  5.0.0
+
+1.8.0 - 2017-04-20
+-----------------
+
+- fix: undefined function (#393)
+- fix: close connection if proxy handshake failed (#392)
+- fix: handle all headers with the new datastructure introduced in 1.7.0 (#395)
+- fix: host header when redirect (#400)
+- fix: use connect timeout when retrieving from the pool (#402)
+- security: new certifi version
+
+1.7.1 - 2017-03-02
+------------------
+
+- fix: regression in headers handling (handle different key types)
+
+1.7.0 - 2017-03-01
+------------------
+
+- fix: new datastructure to handle headers (#390)
+- security: new certifi version
+
+1.6.6 - 2017-02-26
+------------------
+
+- fix: fix header appending
+- fix: Url encode host header for unix domain sockets (#382)
+- security: new certifi version
+- doc: fix few typos
+
+1.6.4 - 2016-12-22
+------------------
+
+- add: optional urlencode options to qs (#368)
+- fix: handle continuation lines in HTTP headers correctly (#366)
+- doc: Fix a few documentation typos
+
+1.6.3 - 2016-10-27
+------------------
+
+- fix: handle trailing whitespace in header values
+
 1.6.2 - 2016-10-22
 ------------------
 

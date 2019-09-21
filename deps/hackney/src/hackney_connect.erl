@@ -6,14 +6,16 @@
 -module(hackney_connect).
 
 -export([connect/3, connect/4, connect/5,
-  create_connection/4, create_connection/5,
-  maybe_connect/1,
-  reconnect/4,
-  set_sockopts/2,
-  ssl_opts/2,
-  check_or_close/1,
-  close/1,
-  is_pool/1]).
+         create_connection/4, create_connection/5,
+         maybe_connect/1,
+         reconnect/4,
+         set_sockopts/2,
+         ssl_opts/2,
+         check_or_close/1,
+         peername/1,
+         sockname/1,
+         close/1,
+         is_pool/1]).
 
 -export([partial_chain/1]).
 
@@ -34,8 +36,15 @@ connect(Transport, Host, Port, Options, Dynamic) ->
     {host, Host},
     {port, Port},
     {dynamic, Dynamic}]),
-  case create_connection(Transport, idna:utf8_to_ascii(Host), Port,
-    Options, Dynamic) of
+
+  Host2 = case Transport of
+            hackney_local_tcp ->
+              Host;
+            _ ->
+              hackney_url:idnconvert_hostname(Host)
+          end,
+
+  case create_connection(Transport, Host2, Port, Options, Dynamic) of
     {ok, #client{request_ref=Ref}} ->
       {ok, Ref};
     Error ->
@@ -66,7 +75,7 @@ create_connection(Transport, Host, Port, Options, Dynamic)
   MaxBody = proplists:get_value(max_body, Options),
 
   %% get mod metrics
-  Engine = metrics:init(hackney_util:mod_metrics()),
+  Engine = hackney_metrics:get_engine(),
 
   %% initial state
   InitialState = #client{mod_metrics=Engine,
@@ -135,6 +144,29 @@ set_sockopts(#client{transport=Transport, socket=Skt}, Options) ->
   Transport:setopts(Skt, Options).
 
 
+%% @doc get the address and port for the other end of current connection in the client
+peername(#client{transport=Transport, socket=Socket}) ->
+  Transport:peername(Socket);
+peername(Ref) when is_reference(Ref) ->
+  case hackney_manager:get_state(Ref) of
+    req_not_found ->
+      req_not_found;
+    Client ->
+      peername(Client)
+  end.
+
+
+%% @doc the local address and port of current socket in the client
+sockname(#client{transport=Transport, socket=Socket}) ->
+  Transport:sockname(Socket);
+sockname(Ref) when is_reference(Ref) ->
+  case hackney_manager:get_state(Ref) of
+    req_not_found ->
+      req_not_found;
+    Client ->
+      sockname(Client)
+  end.
+
 %% @doc close the client
 %%
 %%
@@ -187,8 +219,8 @@ socket_from_pool(Host, Port, Transport, Client0) ->
   case PoolHandler:checkout(Host, Port, Transport, Client) of
     {ok, Ref, Skt} ->
       ?report_debug("reuse a connection", [{pool, PoolName}]),
-      metrics:update_meter(Metrics, [hackney_pool, PoolName, take_rate], 1),
-      metrics:increment_counter(Metrics, [hackney_pool, Host, reuse_connection]),
+      _ = metrics:update_meter(Metrics, [hackney_pool, PoolName, take_rate], 1),
+      _ = metrics:increment_counter(Metrics, [hackney_pool, Host, reuse_connection]),
       Client1 = Client#client{socket=Skt,
         socket_ref=Ref,
         pool_handler=PoolHandler,
@@ -198,9 +230,10 @@ socket_from_pool(Host, Port, Transport, Client0) ->
       {ok, Client1};
     {error, no_socket, Ref} ->
       ?report_trace("no socket in the pool", [{pool, PoolName}]),
-      metrics:increment_counter(Metrics, [hackney_pool, PoolName, no_socket]),
-      do_connect(Host, Port, Transport, Client#client{socket_ref=Ref},
-        pool);
+      _ = metrics:increment_counter(Metrics, [hackney_pool, PoolName, no_socket]),
+      Client1 = Client#client{socket_ref=Ref, pool_handler=PoolHandler},
+
+      do_connect(Host, Port, Transport, Client1, pool);
     Error ->
       Error
   end.
@@ -247,20 +280,20 @@ do_connect(Host, Port, Transport, #client{mod_metrics=Metrics,
     {ok, Skt} ->
       ?report_trace("new connection", []),
       ConnectTime = timer:now_diff(os:timestamp(), Begin)/1000,
-      metrics:update_histogram(Metrics, [hackney, Host, connect_time], ConnectTime),
-      metrics:increment_counter(Metrics, [hackney_pool, Host, new_connection]),
+      _ = metrics:update_histogram(Metrics, [hackney, Host, connect_time], ConnectTime),
+      _ = metrics:increment_counter(Metrics, [hackney_pool, Host, new_connection]),
       Client1 = Client#client{socket=Skt,
         state = connected},
       hackney_manager:update_state(Client1),
       {ok, Client1};
     {error, timeout} ->
       ?report_trace("connect timeout", []),
-      metrics:increment_counter(Metrics, [hackney, Host, connect_timeout]),
+      _ = metrics:increment_counter(Metrics, [hackney, Host, connect_timeout]),
       hackney_manager:cancel_request(Client),
       {error, connect_timeout};
     Error ->
       ?report_trace("connect error", []),
-      metrics:increment_counter(Metrics, [hackney, Host, connect_error]),
+      _ = metrics:increment_counter(Metrics, [hackney, Host, connect_error]),
       hackney_manager:cancel_request(Client),
       Error
   end.
@@ -278,29 +311,34 @@ check_mod_metrics(#client{mod_metrics=Mod}=State)
   when Mod /= nil, Mod /= undefined ->
   State;
 check_mod_metrics(State) ->
-  State#client{mod_metrics=metrics:init(hackney_util:mod_metrics())}.
+  State#client{mod_metrics=hackney_metrics:get_engine()}.
 
 ssl_opts(Host, Options) ->
   case proplists:get_value(ssl_options, Options) of
     undefined ->
-      Insecure =  proplists:get_value(insecure, Options, false),
-      CACerts = certifi:cacerts(),
-      case Insecure of
-        true ->
-          [{verify, verify_none}];
-        false ->
-          VerifyFun = {
-            fun ssl_verify_hostname:verify_fun/3,
-            [{check_hostname, Host}]
-          },
-          [{verify, verify_peer},
-            {depth, 99},
-            {cacerts, CACerts},
-            {partial_chain, fun partial_chain/1},
-            {verify_fun, VerifyFun}]
-      end;
+      ssl_opts_1(Host, Options);
+    [] ->
+      ssl_opts_1(Host, Options);
     SSLOpts ->
       SSLOpts
+  end.
+
+ssl_opts_1(Host, Options) ->
+  Insecure =  proplists:get_value(insecure, Options, false),
+  CACerts = certifi:cacerts(),
+  case Insecure of
+    true ->
+      [{verify, verify_none}];
+    false ->
+      VerifyFun = {
+        fun ssl_verify_hostname:verify_fun/3,
+        [{check_hostname, Host}]
+       },
+      [{verify, verify_peer},
+       {depth, 99},
+       {cacerts, CACerts},
+       {partial_chain, fun partial_chain/1},
+       {verify_fun, VerifyFun}]
   end.
 
 %% code from rebar3 undert BSD license
