@@ -1,1 +1,1 @@
-Elixirbot> <%= result %>
+Elixirbot> {<%= result %>}

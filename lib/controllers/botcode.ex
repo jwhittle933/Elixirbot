@@ -17,6 +17,10 @@ defmodule Elixirbot.BotCode do
     EEx.eval_file("lib/templates/string_or_number.eex", result: result)
   end
 
+  def render_template(result) when is_atom(result) do
+    EEx.eval_file("lib/templates/string_or_number.eex", result: ":" <> Atom.to_string(result))
+  end
+
   def render_template(result) when is_list(result) do
     EEx.eval_file("lib/templates/list.eex", result: result)
   end
@@ -26,6 +30,13 @@ defmodule Elixirbot.BotCode do
   end
 
   def render_template(result) when is_tuple(result) do
-    EEx.eval_file("lib/templates/tuple.eex", result: result)
+    r = Enum.map_join(Tuple.to_list(result), ", ", fn val ->
+      case is_atom(val) do
+        true -> ":" <> Atom.to_string(val)
+        false -> val
+        _ -> raise ArgumentError
+      end
+    end)
+    EEx.eval_file("lib/templates/tuple.eex", result: r)
   end
 end
