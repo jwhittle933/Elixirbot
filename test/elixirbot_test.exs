@@ -34,11 +34,17 @@ defmodule ElixirbotTest do
     end
 
     test "User assigns a tuple" do
-      conn = conn(:post, "/webhook", %{exec: "x = {:ok, 45}"}) |> Router.call(@opts)
-      IO.inspect
+      conn = conn(:post, "/webhook", %{exec: "x = {110, 45}"}) |> Router.call(@opts)
+
       assert conn.state == :sent
       assert conn.status == 200
-      # assert conn.resp_body == "Elixirbot> %{a: 1, b: 2}\n"
+      assert conn.resp_body == "Elixirbot> {110, 45}\n"
+
+      conn = conn(:post, "/webhook", %{exec: "x = {:ok, 45}"}) |> Router.call(@opts)
+
+      assert conn.state == :sent
+      assert conn.status == 200
+      assert conn.resp_body == "Elixirbot> {:ok, 45}\n"
     end
   end
 

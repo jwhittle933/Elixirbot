@@ -1,4 +1,4 @@
-defmodule Elixirbot.TemplatePlug do
+defmodule Elixirbot.AddExecPlug do
   import Plug.Conn
 
   def init(opts), do: opts
@@ -10,7 +10,5 @@ defmodule Elixirbot.TemplatePlug do
   def call(conn, _opts) do
     conn
   end
-
-
 end
 
