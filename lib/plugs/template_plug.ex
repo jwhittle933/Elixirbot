@@ -7,5 +7,10 @@ defmodule Elixirbot.TemplatePlug do
     conn |> assign(:exec, exec)
   end
 
+  def call(conn, _opts) do
+    conn
+  end
+
+
 end
 

@@ -12,7 +12,7 @@ defmodule Elixirbot.Router do
   plug :dispatch
 
   post "/webhook" do
-    conn |> Controller.parse_template
+    conn |> Controller.render
   end
 
 

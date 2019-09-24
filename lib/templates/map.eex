@@ -1,1 +1,1 @@
-Elixirbot> %{<%= for {key, val} <- result do %><%= key %>: <%= val %><%= unless List.last(result) == val, do: ", " %><% end %>}
+Elixirbot> %{<%= Enum.map_join(result, ", ", fn {key, val} -> ~s(#{key}: #{val}) end) %>}

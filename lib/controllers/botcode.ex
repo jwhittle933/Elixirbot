@@ -22,6 +22,10 @@ defmodule Elixirbot.BotCode do
   end
 
   def render_template(result) when is_map(result) do
-    EEx.eval_file("lib/templates/map.eex", result: Map.to_list(result))
+    EEx.eval_file("lib/templates/map.eex", result: result)
+  end
+
+  def render_template(result) when is_tuple(result) do
+    EEx.eval_file("lib/templates/tuple.eex", result: result)
   end
 end
