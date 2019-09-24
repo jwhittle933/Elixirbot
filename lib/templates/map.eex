@@ -1,0 +1,1 @@
+Elixirbot> %{<%= Enum.map_join(result, ", ", fn {key, val} -> ~s(#{key}: #{val}) end) %>}
