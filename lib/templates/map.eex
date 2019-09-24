@@ -1,0 +1,1 @@
+Elixirbot> %{<%= for {key, val} <- result do %><%= key %>: <%= val %><%= unless List.last(result) == val, do: ", " %><% end %>}

@@ -1,0 +1,1 @@
+Elixirbot> [<%= for val <- result do %><%= val %><%= unless List.last(result) == val, do: ", "  %><% end %>]
