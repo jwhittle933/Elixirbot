@@ -77,6 +77,14 @@ defmodule ElixirbotTest do
       assert conn.status == 200
       assert conn.resp_body == "Elixirbot> (UnsupportedError) cannot invoke def/2 outside module\n"
     end
+
+    test "User defines a module" do
+      conn = conn(:post, "/webhook", %{exec: "defmodule Test do\nend"}) |> Router.call(@opts)
+
+      assert conn.state == :sent
+      assert conn.status == 200
+      assert conn.resp_body == "Elixirbot> (Warning) New Module created: Elixir.Test. Elixirbot does not support module or function persistence.\n"
+    end
   end
 
   describe "Evaluations" do
