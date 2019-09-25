@@ -9,11 +9,19 @@ defmodule Elixirbot.BotCode do
   end
 
   def eval_code(exec) do
-    {result, _} = Code.eval_string(exec)
-    result
+    try do
+      {result, _} = Code.eval_string(exec)
+      result
+    rescue
+      e in ArgumentError -> e
+    end
   end
 
-  def render_template(result) when is_binary(result) or is_number(result) do
+  def render_template(%ArgumentError{message: message}) do
+    EEx.eval_file("lib/templates/error.eex", result: message)
+  end
+
+  def render_template(result) when is_binary(result) or is_number(result) or is_boolean(result) do
     EEx.eval_file("lib/templates/string_or_number.eex", result: result)
   end
 
@@ -34,9 +42,9 @@ defmodule Elixirbot.BotCode do
       case is_atom(val) do
         true -> ":" <> Atom.to_string(val)
         false -> val
-        _ -> raise ArgumentError
       end
     end)
     EEx.eval_file("lib/templates/tuple.eex", result: r)
   end
+
 end
