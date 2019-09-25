@@ -6,6 +6,7 @@
                         'Elixir.Elixirbot.Application',
                         'Elixir.Elixirbot.BotCode',
                         'Elixir.Elixirbot.Controller',
+                        'Elixir.Elixirbot.Renderer',
                         'Elixir.Elixirbot.Router']},
               {registered,[]},
               {vsn,"0.1.0"},

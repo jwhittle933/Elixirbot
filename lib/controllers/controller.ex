@@ -11,7 +11,7 @@ defmodule Elixirbot.Controller do
     HTTPoison.post(@webhook, msg)
   end
 
-  def render(conn) do
+  def run(conn) do
     conn
     |> send_resp(200, BotCode.run(conn))
   end
