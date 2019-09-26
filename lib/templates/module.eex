@@ -1,1 +1,1 @@
-Elixirbot> (Warning) New Module created: <%= name %>. Elixirbot does not support module or function persistence.
+Elixirbot> (Warning) New Module: <%= name %>. Elixirbot does not support module or function persistence.

@@ -6,7 +6,10 @@ defmodule Elixirbot.Application do
   use Application
 
   def start(_type, _args) do
+    import Supervisor.Spec, warn: false
+
     children = [
+      supervisor(Elixirbot.BotCode, []),
       Plug.Cowboy.child_spec(scheme: :http, plug: Elixirbot.Router, options: [port: 4000])
     ]
 
