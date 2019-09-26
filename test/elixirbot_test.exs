@@ -75,10 +75,9 @@ defmodule ElixirbotTest do
     test "User assigns an anonymous function without execution" do
       conn = conn(:post, "/webhook", %{exec: "x = (fn x -> x * 2 end)"}) |> Router.call(@opts)
 
-      IO.inspect conn.resp_body
       assert conn.state == :sent
       assert conn.status == 200
-      assert String.contains?(conn.resp_body, "#Function")
+      assert String.contains?(conn.resp_body, "Elixirbot> (UnsupportedError) #Function<")
     end
 
     test "User assigns an anonymous function with execution" do

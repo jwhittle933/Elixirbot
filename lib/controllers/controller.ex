@@ -12,7 +12,6 @@ defmodule Elixirbot.Controller do
   end
 
   def run(conn) do
-    conn
-    |> send_resp(200, BotCode.run(conn))
+    conn |> send_resp(200, BotCode.run(conn))
   end
 end
