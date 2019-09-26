@@ -4,14 +4,6 @@ defmodule Elixirbot.BotCode do
   """
   alias Elixirbot.Renderer
 
-  def start_link do
-    GenServer.start_link(__MODULE__, [:ok])
-  end
-
-  def init([child_spec]) do
-    {:ok, child_spec}
-  end
-
   def run(%Plug.Conn{assigns: %{exec: exec}}) do
     exec
     |> defines?

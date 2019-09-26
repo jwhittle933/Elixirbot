@@ -5,10 +5,14 @@ defmodule Elixirbot.Router do
   alias Elixirbot.Controller
   alias Elixirbot.AddExecPlug
 
+  if Mix.env == :dev do
+    use Plug.Debugger
+  end
+
   plug Plug.Logger, log: :debug
+  plug :match
   plug Plug.Parsers, parsers: [:json], json_decoder: Poison
   plug AddExecPlug
-  plug :match
   plug :dispatch
 
   post "/webhook" do
