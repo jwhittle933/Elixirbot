@@ -11,7 +11,7 @@ defmodule Elixirbot.Router do
 
   plug Plug.Logger, log: :debug
   plug :match
-  plug Plug.Parsers, parsers: [:json], json_decoder: Poison
+  plug Plug.Parsers, parsers: [:json, :urlencoded], json_decoder: Poison
   plug AddExecPlug
   plug :dispatch
 
