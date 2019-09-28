@@ -1,0 +1,9 @@
+version: '3.5'
+
+services:
+        web:
+                image: "elixirbot:latest"
+                ports:
+                        - "80:4000"
+                env_file:
+                        - config/docker.env
