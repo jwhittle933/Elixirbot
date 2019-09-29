@@ -25,7 +25,6 @@ RUN apk update && \
     mix local.hex --force
 
 COPY . .
-COPY lib/templates/ app/lib/templates
 
 RUN mix do deps.get, deps.compile, compile
 
