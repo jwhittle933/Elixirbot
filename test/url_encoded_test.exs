@@ -15,7 +15,7 @@ defmodule ElixirbotTestUrlEncoded do
 
       assert conn.state == :sent
       assert conn.status == 200
-      assert conn.resp_body == "Elixirbot> 11\n"
+      assert conn.resp_body == "```\nElixirbot> 11\n```"
     end
 
     test "User assigns a float" do
@@ -23,7 +23,7 @@ defmodule ElixirbotTestUrlEncoded do
 
       assert conn.state == :sent
       assert conn.status == 200
-      assert conn.resp_body == "Elixirbot> 11.234\n"
+      assert conn.resp_body == "```\nElixirbot> 11.234\n```"
     end
 
     test "User assigns an atom" do
@@ -31,7 +31,7 @@ defmodule ElixirbotTestUrlEncoded do
 
       assert conn.state == :sent
       assert conn.status == 200
-      assert conn.resp_body == "Elixirbot> :ok\n"
+      assert conn.resp_body == "```\nElixirbot> :ok\n```"
     end
 
     test "User assigns a list" do
@@ -39,7 +39,7 @@ defmodule ElixirbotTestUrlEncoded do
 
       assert conn.state == :sent
       assert conn.status == 200
-      assert conn.resp_body == "Elixirbot> [1, 2, 3, 4]\n"
+      assert conn.resp_body == "```\nElixirbot> [1, 2, 3, 4]\n```"
     end
 
     test "User assigns a map" do
@@ -47,7 +47,7 @@ defmodule ElixirbotTestUrlEncoded do
 
       assert conn.state == :sent
       assert conn.status == 200
-      assert conn.resp_body == "Elixirbot> %{a: 1, b: 2}\n"
+      assert conn.resp_body == "```\nElixirbot> %{a: 1, b: 2}\n```"
     end
 
     test "User assigns a tuple" do
@@ -55,13 +55,13 @@ defmodule ElixirbotTestUrlEncoded do
 
       assert conn.state == :sent
       assert conn.status == 200
-      assert conn.resp_body == "Elixirbot> {110, 45}\n"
+      assert conn.resp_body == "```\nElixirbot> {110, 45}\n```"
 
       conn = conn(:post, "/webhook", %{exec: "x = {:ok, 45}"}) |> Router.call(@opts)
 
       assert conn.state == :sent
       assert conn.status == 200
-      assert conn.resp_body == "Elixirbot> {:ok, 45}\n"
+      assert conn.resp_body == "```\nElixirbot> {:ok, 45}\n```"
     end
 
     test "User assigns a list of tuples" do
@@ -69,7 +69,7 @@ defmodule ElixirbotTestUrlEncoded do
 
       assert conn.state == :sent
       assert conn.status == 200
-      assert conn.resp_body == "Elixirbot> [{12, 12}, {13, 13}]\n"
+      assert conn.resp_body == "```\nElixirbot> [{12, 12}, {13, 13}]\n```"
     end
 
     test "User assigns an anonymous function without execution" do
@@ -85,7 +85,7 @@ defmodule ElixirbotTestUrlEncoded do
 
       assert conn.state == :sent
       assert conn.status == 200
-      assert conn.resp_body == "Elixirbot> 32\n"
+      assert conn.resp_body == "```\nElixirbot> 32\n```"
     end
 
   end
@@ -97,7 +97,7 @@ defmodule ElixirbotTestUrlEncoded do
 
       assert conn.state == :sent
       assert conn.status == 200
-      assert conn.resp_body == "Elixirbot> \"(Warning) No def* support in Elixirbot. Use iex for modular integration.\"\n"
+      assert conn.resp_body == "```\nElixirbot> \"(Warning) No def* support in Elixirbot. Use iex for modular integration.\"\n```"
     end
 
     test "User defines a module" do
@@ -105,7 +105,7 @@ defmodule ElixirbotTestUrlEncoded do
 
       assert conn.state == :sent
       assert conn.status == 200
-      assert conn.resp_body == "Elixirbot> \"(Warning) No def* support in Elixirbot. Use iex for modular integration.\"\n"
+      assert conn.resp_body == "```\nElixirbot> \"(Warning) No def* support in Elixirbot. Use iex for modular integration.\"\n```"
     end
   end
 
@@ -116,7 +116,7 @@ defmodule ElixirbotTestUrlEncoded do
 
       assert conn.state == :sent
       assert conn.status == 200
-      assert conn.resp_body == "Elixirbot> [2, 4, 6]\n"
+      assert conn.resp_body == "```\nElixirbot> [2, 4, 6]\n```"
     end
 
     test "List.first" do
@@ -124,7 +124,7 @@ defmodule ElixirbotTestUrlEncoded do
 
       assert conn.state == :sent
       assert conn.status == 200
-      assert conn.resp_body == "Elixirbot> 1\n"
+      assert conn.resp_body == "```\nElixirbot> 1\n```"
     end
 
     test "assertion of truth" do
@@ -132,7 +132,7 @@ defmodule ElixirbotTestUrlEncoded do
 
       assert conn.state == :sent
       assert conn.status == 200
-      assert conn.resp_body == "Elixirbot> true\n"
+      assert conn.resp_body == "```\nElixirbot> true\n```"
     end
   end
 
@@ -143,7 +143,7 @@ defmodule ElixirbotTestUrlEncoded do
 
       assert conn.state == :sent
       assert conn.status == 200
-      assert conn.resp_body == "Elixirbot> 3\n"
+      assert conn.resp_body == "```\nElixirbot> 3\n```"
     end
   end
 

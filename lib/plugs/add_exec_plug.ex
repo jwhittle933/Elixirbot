@@ -1,6 +1,6 @@
 defmodule Elixirbot.AddExecPlug do
   import Plug.Conn
-  alias Elixirbot.Request
+  # alias Elixirbot.Request
 
   def init(opts), do: opts
 
@@ -11,5 +11,7 @@ defmodule Elixirbot.AddExecPlug do
   def call(%Plug.Conn{params: %{"text" => exec}} = conn, _opts) do
     conn |> assign(:exec, exec)
   end
+
+  def call(conn, _opts), do: conn
 end
 

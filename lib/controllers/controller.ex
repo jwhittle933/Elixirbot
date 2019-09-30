@@ -4,11 +4,18 @@ defmodule Elixirbot.Controller do
   """
   import Plug.Conn, only: [send_resp: 3]
   alias Elixirbot.BotCode
+  alias Elixirbot.Response
 
-  @webhook Application.get_env(:elixirbot, :slack_webhook_url)
+  @webhook Application.get_env(:elixirbot, :webhook)
 
-  def post_to_slack(msg) do
-    HTTPoison.post(@webhook, msg)
+  def post_to_slack(%Plug.Conn{params: params} = conn) do
+    {:ok, msg} =
+      Response.new(params)
+      |> Response.evaluate(BotCode.run(conn))
+      |> Poison.encode()
+
+    {_code, _reason} = HTTPoison.post(@webhook, msg)
+    conn
   end
 
   def run(conn) do

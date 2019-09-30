@@ -3,8 +3,8 @@ defmodule Elixirbot.Renderer do
   Rendering Engine
   """
 
-  @error "Elixirbot> (UnsupportedError) <%= result %>\n"
-  @result "Elixirbot> <%= result %>\n"
+  @error "```\nElixirbot> (UnsupportedError) <%= result %>\n```"
+  @result "```\nElixirbot> <%= result %>\n```"
 
   def render_template(%ArgumentError{message: message}) do
     EEx.eval_string(@error, result: message)
