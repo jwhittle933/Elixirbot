@@ -18,6 +18,8 @@ defmodule Elixirbot.Controller do
     conn
   end
 
+  # def post_to_channel(conn), do: conn
+
   def respond(%Plug.Conn{assigns: assigns} = conn) do
     conn |> send_resp(200, BotCode.run(assigns[:request]))
   end
