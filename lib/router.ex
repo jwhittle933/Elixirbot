@@ -17,7 +17,7 @@ defmodule Elixirbot.Router do
 
   post "/webhook" do
     conn
-    |> Controller.post_to_slack
+    |> Controller.post_to_channel
     |> Controller.respond
   end
 
