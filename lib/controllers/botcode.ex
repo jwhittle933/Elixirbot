@@ -3,9 +3,10 @@ defmodule Elixirbot.BotCode do
   Module for code injection
   """
   alias Elixirbot.Renderer
+  alias Elixirbot.Request
 
-  def run(%Plug.Conn{assigns: %{exec: exec}}) do
-    exec
+  def run(%Request{text: text}) do
+    text
     |> defines?
     |> Renderer.render_template
   end

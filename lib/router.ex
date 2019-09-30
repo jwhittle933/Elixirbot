@@ -3,7 +3,7 @@ defmodule Elixirbot.Router do
   use Plug.Debugger, otp_app: :elixirbot
 
   alias Elixirbot.Controller
-  alias Elixirbot.AddExecPlug
+  alias Elixirbot.AssignRequestPlug
 
   if Mix.env == :dev do
     use Plug.Debugger
@@ -12,13 +12,13 @@ defmodule Elixirbot.Router do
   plug Plug.Logger, log: :debug
   plug :match
   plug Plug.Parsers, parsers: [:json, :urlencoded], json_decoder: Poison
-  plug AddExecPlug
+  plug AssignRequestPlug
   plug :dispatch
 
   post "/webhook" do
     conn
     |> Controller.post_to_slack
-    |> Controller.run
+    |> Controller.respond
   end
 
   match _ do

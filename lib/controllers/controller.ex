@@ -8,17 +8,18 @@ defmodule Elixirbot.Controller do
 
   @webhook Application.get_env(:elixirbot, :webhook)
 
-  def post_to_slack(%Plug.Conn{params: params} = conn) do
+  def post_to_slack(%Plug.Conn{params: params, assigns: assigns} = conn) do
+    IO.inspect assigns
     {:ok, msg} =
       Response.new(params)
-      |> Response.evaluate(BotCode.run(conn))
+      |> Response.expand(BotCode.run(assigns[:request], "ephemeral"))
       |> Poison.encode()
 
     {_code, _reason} = HTTPoison.post(@webhook, msg)
     conn
   end
 
-  def run(conn) do
-    conn |> send_resp(200, BotCode.run(conn))
+  def respond(%Plug.Conn{assigns: assigns} = conn) do
+    conn |> send_resp(200, BotCode.run(assigns[:request]))
   end
 end

@@ -25,7 +25,7 @@ defmodule Elixirbot.Response do
     |> cast(params, [:text])
   end
 
-  def evaluate(%__MODULE__{} = response, text) do
-    %__MODULE__{response | text: text, response_type: "ephemeral"}
+  def expand(%__MODULE__{} = response, text, type) do
+    %__MODULE__{response | text: text, response_type: type}
   end
 end
