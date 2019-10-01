@@ -2,38 +2,24 @@ defmodule Elixirbot.Request do
   @moduledoc """
   Request module for building struct from urlencoded params
   """
-  defstruct [
-    :token,
-    :command,
-    :text,
-    :response_url,
-    :user_id,
-    :team_id,
-    :channel_id,
-    :channel_name
-  ]
+  use Ecto.Schema
+  import Ecto.Changeset
 
-  def new(%{
-        "token" => token,
-        "team_id" => team_id,
-        "channel_id" => channel_id,
-        "channel_name" => channel_name,
-        "command" => command,
-        "text" => text,
-        "response_url" => response_url,
-        "user_id" => user_id
-          }) do
-    %__MODULE__{
-      token: token,
-      command: command,
-      text: text,
-      response_url: response_url,
-      user_id: user_id,
-      team_id: team_id,
-      channel_id: channel_id,
-      channel_name: channel_name,
-    }
+  schema "request" do
+    field :token
+    field :command
+    field :text
+    field :response_url
+    field :user_id
+    field :team_id
+    field :channel_id
+    field :channel_name
   end
 
+  def new(params \\ %{}) do
+    %__MODULE__{}
+    |> cast(params, [:token, :command, :text, :response_url, :user_id, :team_id, :channel_name, :channel_id])
+    |> apply_changes
+  end
 end
 

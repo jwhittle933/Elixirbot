@@ -4,8 +4,6 @@ defmodule Elixirbot.Application do
   @moduledoc false
   use Application
 
-  @token Application.get_env(:elixirbot, Elixirbot.Slack)[:token]
-
   def start(_type, _args) do
 
     children = [
