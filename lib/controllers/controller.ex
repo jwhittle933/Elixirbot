@@ -9,21 +9,21 @@ defmodule Elixirbot.Controller do
   @webhook Application.get_env(:elixirbot, :webhook)
 
   def post_to_channel(%Plug.Conn{assigns: assigns} = conn) do
-    IO.inspect assigns
     {:ok, msg} =
       Response.new(%{text: BotCode.run(assigns[:request]), response_type: "ephemeral"})
       |> Poison.encode()
 
-    {_code, _reason} = HTTPoison.post(get_webhook(assigns[:request]), msg)
+    {code, reason} = HTTPoison.post(get_webhook(assigns[:request]), msg)
+    IO.inspect code, label: "\n\nCode"
+    IO.inspect reason, label: "\n\nReason"
     conn
   end
 
-  # def post_to_channel(conn), do: conn
+  def post_to_channel(conn), do: conn
 
   def respond(%Plug.Conn{assigns: assigns} = conn) do
     conn |> send_resp(200, BotCode.run(assigns[:request]))
   end
-
 
   defp get_webhook(request) do
     case Map.get(request, :response_url) do

@@ -6,15 +6,19 @@ defmodule Elixirbot.Renderer do
   @error "```\nElixirbot> (UnsupportedError) <%= result %>\n```"
   @result "```\nElixirbot> <%= result %>\n```"
 
-  def render_template(%ArgumentError{message: message}) do
+  def render(%ArgumentError{message: message}) do
     EEx.eval_string(@error, result: message)
   end
 
-  def render_template(result) when is_function(result) do
+  def render(result) when is_function(result) do
     EEx.eval_string(@error, result: inspect result)
   end
 
-  def render_template(result) do
+  def render(result) when is_binary(result) or is_integer(result) or is_float(result) do
+    EEx.eval_string(@result, result: result)
+  end
+
+  def render(result) do
     EEx.eval_string(@result, result: inspect result)
   end
 end
