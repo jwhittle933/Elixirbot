@@ -23,11 +23,11 @@ defmodule Elixirbot.BotCode do
 
   def run(%Request{text: text}) do
     text
-    |> parse_input
+    |> no_execute?
     |> Renderer.render
   end
 
-  def parse_input(input) do
+  def no_execute?(input) do
     case input do
       <<"def", _::binary>> -> "(Warning) No def* support in Elixirbot. Use iex for modular integration."
       <<"help", _::binary>> -> @help

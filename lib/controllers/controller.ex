@@ -3,9 +3,11 @@ defmodule Elixirbot.Controller do
   Controller for parsing .eex
   """
   import Plug.Conn, only: [send_resp: 3]
-  alias Elixirbot.BotCode
 
   def respond(%Plug.Conn{assigns: assigns} = conn) do
-    conn |> send_resp(200, BotCode.run(assigns[:request]))
+    conn
+    |> send_resp(200, assigns[:eval])
   end
+
+  def respond(conn), do: conn |> send_resp(200, "Error processing code.")
 end

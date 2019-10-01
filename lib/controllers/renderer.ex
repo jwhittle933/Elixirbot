@@ -14,9 +14,9 @@ defmodule Elixirbot.Renderer do
     EEx.eval_string(@error, result: inspect result)
   end
 
-  # def render(result) when is_binary(result) or is_integer(result) or is_float(result) do
-  #   EEx.eval_string(@result, result: result)
-  # end
+  def render(result) when is_binary(result) or is_integer(result) or is_float(result) do
+    EEx.eval_string(@result, result: result)
+  end
 
   def render(result) do
     EEx.eval_string(@result, result: inspect result)
