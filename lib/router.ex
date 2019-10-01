@@ -1,6 +1,5 @@
 defmodule Elixirbot.Router do
   use Plug.Router
-  use Plug.ErrorHandler
 
   alias Elixirbot.Controller
   alias Elixirbot.Slack
@@ -8,6 +7,7 @@ defmodule Elixirbot.Router do
 
   if Mix.env == :dev do
     use Plug.Debugger, otp_app: :elixirbot
+    use Plug.ErrorHandler
   end
 
   plug Plug.Logger, log: :debug
@@ -29,7 +29,6 @@ defmodule Elixirbot.Router do
   match _ do
     send_resp(conn, 404, "not found")
   end
-
 
   defp handle_errors(conn, %{kind: _kind, reason: _reason, stack: _stack}) do
     send_resp(conn, conn.status, "Something went wrong.")
