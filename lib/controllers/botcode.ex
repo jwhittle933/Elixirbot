@@ -1,15 +1,25 @@
 defmodule Elixirbot.BotCode do
   @moduledoc """
-  Module for code injection
+  Module for code evaluation
   """
   alias Elixirbot.Renderer
   alias Elixirbot.Request
 
   @help "help
-  Elixirbot [0.1.0] © Jonathan Whittle for use with _D\n
-  Elixirbot is invoked by typing /helix followed by valid Elixir code.
-  (Not Supported) /helix does not support and def* methods,
-  \tdef, defmodule, defstruct, etc."
+  Elixirbot [0.1.0] © 2019 Jonathan Whittle for use with _D\n
+  (Unsupported) def, defmodule, defstruct, etc.\n
+  Examples:\n
+  /helix x = 10
+  Elixirbot> 10\n
+  /helix 10 == 10
+  Elixirbot> true\n
+  /helix List.first([1, 2, 3])
+  Elixirbot> 1\n
+  /helix Enum.map([2, 3, 4], fn x -> x * 2 end)
+  Elixirbot> [4, 6, 8]\n
+  /helix x = fn x -> x *10 end
+  x.(30)
+  Elixirbot> 300\n"
 
   def run(%Request{text: text}) do
     text

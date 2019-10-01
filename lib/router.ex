@@ -1,12 +1,13 @@
 defmodule Elixirbot.Router do
   use Plug.Router
-  use Plug.Debugger, otp_app: :elixirbot
+  use Plug.ErrorHandler
 
   alias Elixirbot.Controller
+  alias Elixirbot.Slack
   alias Elixirbot.AssignRequestPlug
 
   if Mix.env == :dev do
-    use Plug.Debugger
+    use Plug.Debugger, otp_app: :elixirbot
   end
 
   plug Plug.Logger, log: :debug
@@ -15,9 +16,13 @@ defmodule Elixirbot.Router do
   plug AssignRequestPlug
   plug :dispatch
 
-  post "/webhook" do
+  get "/healthcheck" do
+    send_resp(conn, 200, "All good.")
+  end
+
+  post "/helix" do
     conn
-    |> Controller.post_to_channel
+    |> Slack.respond
     |> Controller.respond
   end
 
@@ -25,4 +30,8 @@ defmodule Elixirbot.Router do
     send_resp(conn, 404, "not found")
   end
 
+
+  defp handle_errors(conn, %{kind: _kind, reason: _reason, stack: _stack}) do
+    send_resp(conn, conn.status, "Something went wrong.")
+  end
 end
