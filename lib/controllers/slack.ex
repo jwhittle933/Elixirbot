@@ -11,27 +11,24 @@ defmodule Elixirbot.Slack do
     request = assigns[:request]
     eval = BotCode.run(request)
 
-    %{text: eval, response_type: "ephemeral"}
+    %{text: eval, response_type: "in_channel"}
     |> Response.new
-    |> Poison.encode
-    |> send_response(request)
-
-    conn
-    |> Plug.Conn.assign(:eval, eval)
+    # |> Poison.encode
+    |> send_response(request, conn)
   end
 
   def respond(conn), do: conn
 
-  defp send_response({:ok, msg}, request) do
-    {code, reason} = HTTPoison.post(get_webhook(request), msg)
-    IO.inspect code, label: "\n\nCode"
-    IO.inspect reason, label: "\n\nReason"
+  defp send_response(%Response{text: text}, request, conn) do
+    {_code, _reason} = HTTPoison.post(get_webhook(request), text, [{"Content-type", "application/json"}])
+
+    Plug.Conn.assign(conn, :resp, text)
   end
 
-  defp send_response({:error, _}, request) do
-    {code, reason} = HTTPoison.post(get_webhook(request), "Encoding error")
-    IO.inspect code, label: "\n\nCode"
-    IO.inspect reason, label: "\n\nReason"
+  defp send_response({:error, e}, request, conn) do
+    {_code, _reason} = HTTPoison.post(get_webhook(request), "Encoding error")
+
+    Plug.Conn.assign(conn, :resp, e.message)
   end
 
   defp get_webhook(request) do
