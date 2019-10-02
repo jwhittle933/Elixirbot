@@ -13,16 +13,16 @@ defmodule Elixirbot.Slack do
 
     %{text: eval, response_type: "in_channel"}
     |> Response.new
-    |> Poison.encode
+    # |> Poison.encode
     |> send_response(request, conn)
   end
 
   def respond(conn), do: conn
 
-  defp send_response({:ok, msg}, request, conn) do
-    {_code, _reason} = HTTPoison.post(get_webhook(request), msg, [{"Content-type", "application/json"}])
+  defp send_response(%Response{text: text}, request, conn) do
+    {_code, _reason} = HTTPoison.post(get_webhook(request), text, [{"Content-type", "application/json"}])
 
-    Plug.Conn.assign(conn, :resp, msg)
+    Plug.Conn.assign(conn, :resp, text)
   end
 
   defp send_response({:error, e}, request, conn) do
