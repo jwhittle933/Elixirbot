@@ -20,7 +20,7 @@ defmodule Elixirbot.Slack do
   def respond(conn), do: conn
 
   defp send_response({:ok, msg}, request, conn) do
-    {_code, _reason} = HTTPoison.post(get_webhook(request), msg)
+    {_code, _reason} = HTTPoison.post(get_webhook(request), msg, [{"Content-type", "application/json"}])
 
     Plug.Conn.assign(conn, :resp, msg)
   end

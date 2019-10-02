@@ -12,7 +12,7 @@ build:
 	docker build --build-arg APP_NAME=$(APP_NAME) \
 		--build-arg APP_VSN=$(APP_VSN) \
 		-t $(APP_NAME):$(APP_VSN)-$(BUILD) \
-		-t jwhittle/$(APP_NAME):latetst \
+		-t jwhittle/$(APP_NAME):latest \
 		-t $(APP_NAME):latest .
 
 run:
