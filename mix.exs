@@ -26,6 +26,7 @@ defmodule Elixirbot.MixProject do
       {:plug, "~>1.8"},
       {:plug_cowboy, "~>2.0"},
       {:poison, "~>3.1"},
+      {:jason, "~>1.1"},
       {:httpoison, "~>1.5"},
       {:distillery, "~>2.0"},
       {:ecto, "~>3.2.1"}

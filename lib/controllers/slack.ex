@@ -10,21 +10,17 @@ defmodule Elixirbot.Slack do
     request = assigns[:request]
     eval = BotCode.run(request)
 
-    %{text: "`#{request.text}`", response_type: "in_channel", attachments: [%{text: eval}]}
-    |> Poison.encode!
+    %{"text" => "`#{request.text}`", "response_type" => "in_channel", "attachments" => [%{"text" => eval}]}
+    |> Jason.encode!
     |> send_response(request, conn)
   end
 
   def respond(conn), do: conn
 
   defp send_response(response, request, conn) do
-    with true <- Mix.env == :test do
-      Plug.Conn.assign(conn, :resp, response)
-    else
-      _ ->
-        {_code, _reason} = HTTPoison.post(get_webhook(request), response, [{"Content-type", "application/json"}])
-        Plug.Conn.assign(conn, :resp, response)
-    end
+    {_code, _reason} = HTTPoison.post(get_webhook(request), response, [{"Content-type", "application/json"}])
+
+    Plug.Conn.assign(conn, :resp, response)
   end
 
   defp get_webhook(request) do
