@@ -2,9 +2,14 @@ defmodule Elixirbot.Controller do
   @moduledoc """
   Controller for parsing .eex
   """
-  import Plug.Conn, only: [send_resp: 3]
+  import Plug.Conn
 
-  def respond(%Plug.Conn{assigns: assigns} = conn), do: send_resp(conn, 200, assigns[:resp])
+  def respond(%Plug.Conn{assigns: assigns} = conn) do
+    conn
+    |> put_resp_header("Content-type", "application/json")
+    |> put_resp_header("Accept", "application/json")
+    |> send_resp(200, assigns[:resp])
+  end
 
   def respond(conn), do: conn |> send_resp(200, "Error processing code.")
 end
